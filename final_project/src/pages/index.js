@@ -1,31 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import TodoForm from './Todoform';
-import TodoList from './Todolist';
+import styles from '../styles/Home.module.css';
 
-const TodoPage = () => {
-  const [todos, setTodos] = useState([]);
-
-  const fetchTodos = async () => {
-    try {
-      const response = await axios.get('/api/todos');
-      setTodos(response.data);
-    } catch (error) {
-      console.error('Error fetching todos:', error);
-    }
-  };
+export default function Home() {
+  const [pokemonList, setPokemonList] = useState([]);
 
   useEffect(() => {
-    fetchTodos();
+    axios
+      .get('https://pokeapi.co/api/v2/pokemon?limit=20')
+      .then((response) => {
+        setPokemonList(response.data.results);
+      })
+      .catch((error) => {
+        console.error('Error fetching Pokémon data:', error);
+      });
   }, []);
 
   return (
-    <div>
-      <h1>Todo List</h1>
-      <TodoForm fetchTodos={fetchTodos} />
-      <TodoList todos={todos} fetchTodos={fetchTodos} />
-    </div>
+    <>
+      {pokemonList.map((pokemon, index) => (
+        <section key={index} className={styles['pokemon-card']}>
+          <img
+            src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index + 1}.png`}
+            alt={pokemon.name}
+            className={styles['pokemon-image']}
+          />
+          <p className={styles['pokemon-name']}>{pokemon.name}</p>
+        </section>
+      ))}
+    </>
   );
-};
-
-export default TodoPage;
+}
